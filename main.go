@@ -11,9 +11,10 @@ var currentDoorStatus bool
 var latestChangeTime int64
 
 func main() {
-	var bot_token string
+	var bot_token, web_path string
 	var insert_period int
 	flag.StringVar(&bot_token, "t", "", "Bot's Token string")
+	flag.StringVar(&web_path, "w", "https://ibarami.github.io/", "Web path for check door status")
 	flag.IntVar(&insert_period, "d", 60, "Getting web information task's period (second)")
 	flag.Parse()
 
@@ -37,7 +38,7 @@ func main() {
 	go func(chan_status chan bool, chan_time chan int64) {
 		var last_status bool
 		for {
-			res_html, err := getRawHtml("https://ibarami.github.io/")
+			res_html, err := getRawHtml(web_path)
 			if err != nil {
 				fmt.Println("[HTTP Error]", err)
 			} else {
