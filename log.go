@@ -17,7 +17,7 @@ func setLogPath() (string, error) {
 }
 
 func setLogStream(path string) (*os.File, error) {
-	fpLog, err := os.OpenFile(path+"/"+time.Now().Format("2006-01-02T15_04_05")+".txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	fpLog, err := os.OpenFile(path+"/"+time.Now().Format("2006-01-02T15_04_05")+".txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0775)
 	if err != nil {
 		return nil, err
 	} else {
@@ -30,7 +30,7 @@ func setLogStream(path string) (*os.File, error) {
 func prepareDirectory(dir ...string) {
 	for _, val := range dir {
 		if _, err := os.Stat(val); os.IsNotExist(err) {
-			os.Mkdir(val, 0666)
+			os.Mkdir(val, 0775)
 		}
 	}
 }
