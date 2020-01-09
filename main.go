@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"flag"
-	"fmt"
 	"log"
 	"time"
 )
@@ -35,12 +34,12 @@ func main() {
 	/* Open DB */
 	err = openDB("./db.db")
 	checkError("DB Open", err)
-	fmt.Println("[DB opened successfully]")
+	log.Println("[DB opened successfully]")
 
 	/* Start discord bot */
 	err = startBot(bot_token)
 	checkError("Starting bot", err)
-	fmt.Println("[Bot started successfully]")
+	log.Println("[Bot started successfully]")
 
 	chan_change_status := make(chan bool)
 	chan_change_time := make(chan int64)
