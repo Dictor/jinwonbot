@@ -25,3 +25,5 @@
 # Go module temp
 *.sum
 
+log/
+
