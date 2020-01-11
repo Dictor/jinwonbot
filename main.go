@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"flag"
+	"fmt"
 	"log"
 	"time"
 )
@@ -56,7 +57,7 @@ func main() {
 				if err != nil {
 					log.Println("[DB Insert Error]", err)
 				} else {
-					log.Print("i")
+					fmt.Print("i")
 				}
 			}
 
