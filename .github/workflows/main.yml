@@ -7,7 +7,7 @@ name: Build
 jobs:
   release-linux-386:
     name: release linux/386
-    runs-on: windows-latest
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@master
     - name: compile and release
@@ -29,7 +29,7 @@ jobs:
         GOOS: linux
   release-windows-386:
     name: release windows/386
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@master
     - name: compile and release
@@ -40,7 +40,7 @@ jobs:
         GOOS: windows
   release-windows-amd64:
     name: release windows/amd64
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
     - uses: actions/checkout@master
     - name: compile and release
