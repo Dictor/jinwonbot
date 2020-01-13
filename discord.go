@@ -44,7 +44,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				now_answer += fmt.Sprintf("닫혀있습니다! %s전에 닫혔어요!", time_string)
 			}
 		}
-
+		log.Printf("[Message Send](%s-%s): %s → %s \n", m.Author.ID, m.Author.Username, m.Content, now_answer)
 		s.ChannelMessageSend(m.ChannelID, now_answer)
 	}
 }
