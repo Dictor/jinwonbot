@@ -32,16 +32,16 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 		if latestChangeTime == 0 {
 			if currentDoorStatus {
-				now_answer += "열려있습니다!, 언제 열렸는지는 잘 모르겠어요 ㅠㅠ"
+				now_answer += "열려있습니다! 언제 열렸는지는 잘 모르겠어요 ㅠㅠ"
 			} else {
-				now_answer += "닫혀있습니다!, 언제 닫혔는지는 잘 모르겠어요 ㅠㅠ"
+				now_answer += "닫혀있습니다! 언제 닫혔는지는 잘 모르겠어요 ㅠㅠ"
 			}
 		} else {
 			time_string = formatSecond(int64(time.Now().Sub(time.Unix(latestChangeTime, 0)).Seconds()))
 			if currentDoorStatus {
-				now_answer += fmt.Sprintf("열려있습니다!, %s전에 열렸어요!", time_string)
+				now_answer += fmt.Sprintf("열려있습니다! %s전에 열렸어요!", time_string)
 			} else {
-				now_answer += fmt.Sprintf("닫혀있습니다!, %s전에 닫혔어요!", time_string)
+				now_answer += fmt.Sprintf("닫혀있습니다! %s전에 닫혔어요!", time_string)
 			}
 		}
 
