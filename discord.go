@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/bwmarrin/discordgo"
+	"log"
 	"strings"
 	"time"
 	"unicode/utf8"
