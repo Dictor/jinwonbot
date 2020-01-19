@@ -8,6 +8,8 @@ import (
 	"time"
 )
 
+const version string = "v1.0.2"
+
 var currentDoorStatus bool
 var latestChangeTime int64
 
