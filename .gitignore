@@ -21,6 +21,7 @@
 
 # Database
 *.db
+*.json
 
 # Go module temp
 *.sum
