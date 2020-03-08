@@ -21,6 +21,7 @@ type TimeBlock struct {
 	Hour    int    `json:"hour"` // integer hour
 	Minute  string `json:"min"`  // 0~9="0", 10~19="1", 20~29="2", 30~39="3", 40~49="4", 50~59="5"
 	RawUnix int64  `json:"timestamp"`
+	Status  bool   `json:"status"`
 }
 
 func main() {
@@ -50,12 +51,15 @@ func main() {
 	}
 
 	ioutil.WriteFile("result.json", jsonres, 0775)
+	jsres := "var data = " + string(jsonres) + ";"
+	ioutil.WriteFile("result.js", []byte(jsres), 0775)
+
 	log.Printf("%d bytes writed, task complete.", len(jsonres))
 }
 
 func newBlock(d DoorStatus) TimeBlock {
 	t := time.Unix(d.Time, 0)
 	m := fmt.Sprintf("%02d", t.Minute())
-	res := TimeBlock{fmt.Sprintf("%02d%02d%02d", t.Year()-2000, t.Month(), t.Day()), t.Hour(), m[0:1], d.Time}
+	res := TimeBlock{fmt.Sprintf("%02d%02d%02d", t.Year()-2000, t.Month(), t.Day()), t.Hour(), m[0:1], d.Time, d.Status}
 	return res
 }
