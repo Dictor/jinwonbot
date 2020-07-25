@@ -1,55 +1,54 @@
 package main
 
 import (
-	"github.com/samonzeweb/godb"
-	"github.com/samonzeweb/godb/adapters/sqlite"
+	"github.com/timshannon/badgerhold"
 	"os"
+	"time"
+	"fmt"
 )
 
 type DoorStatus struct {
-	Time   int64 `db:"timestamp,key"`
-	Status bool  `db:"status"`
+	Time   int64
+	Status bool
 }
 
-var currentDB *godb.DB
+var currentStore *badgerhold.Store
 
 func openDB(path string) error {
 	var err error
-	var table_init bool = false
-	if fileExist(path) {
-		table_init = true
-	}
-
-	currentDB, err = godb.Open(sqlite.Adapter, path)
-	if !table_init {
-		_, interr := currentDB.CurrentDB().Exec("CREATE TABLE DoorStatus(timestamp INTEGER PRIMARY KEY NOT NULL, status TEXT NOT NULL)")
-		if interr != nil {
-			return interr
-		}
-	}
-
+	opt := badgerhold.DefaultOptions
+	opt.Dir = path
+	opt.ValueDir = path
+	currentStore, err = badgerhold.Open(opt)
 	return err
 }
 
 func closeDB() error {
-	err := currentDB.Close()
+	err := currentStore.Close()
 	return err
 }
 
 func insertStatus(status *DoorStatus) error {
-	return currentDB.Insert(status).Do()
+	return currentStore.Insert(fmt.Sprintf("status,%d", time.Now().Unix()), status)
 }
 
 func getLatestStatus() (*DoorStatus, error) {
-	now_status := DoorStatus{}
-	err := currentDB.Select(&now_status).OrderBy("timestamp DESC").Limit(1).Do()
-	return &now_status, err
+	nowStatus := DoorStatus{}
+	res, err := currentStore.FindAggregate(&nowStatus, nil, "Time")
+	if len(res) < 1 {
+		return nil, err
+	}
+	res[0].Max("Time", &nowStatus)
+	return &nowStatus, err
 }
 
 func getLatestConditionStatus(condition bool) (*DoorStatus, error) {
-	now_status := DoorStatus{}
-	err := currentDB.Select(&now_status).Where("status = ?", condition).OrderBy("timestamp DESC").Limit(1).Do()
-	return &now_status, err
+	nowStatus := []DoorStatus{}
+	err := currentStore.Find(&nowStatus, badgerhold.Where("Status").Eq(condition).SortBy("Time").Limit(1))
+	if len(nowStatus) < 1 {
+		return nil, err
+	}
+	return &nowStatus[0], err
 }
 
 func fileExist(filename string) bool {

@@ -4,8 +4,10 @@ go 1.13
 
 require (
 	github.com/bwmarrin/discordgo v0.20.2
+	github.com/dgraph-io/badger v1.6.1
 	github.com/go-resty/resty/v2 v2.1.0
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/mattn/go-sqlite3 v2.0.2+incompatible
 	github.com/samonzeweb/godb v1.0.13
+	github.com/timshannon/badgerhold v0.0.0-20200723210455-8addb9de1e75
 )
