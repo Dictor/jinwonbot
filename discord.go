@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/bwmarrin/discordgo"
 	"log"
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/bwmarrin/discordgo"
 )
 
 var currentSession *discordgo.Session
@@ -28,7 +29,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID { // Ignore bot's itself message
 		return
 	} else {
-		pContent = strings.Split(m.Content, " ")
+		pContent := strings.Split(m.Content, " ")
 		switch len(pContent) {
 		case 0:
 			if strings.Contains(m.Content, "진원쿤") && utf8.RuneCountInString(m.Content) <= 5 {
@@ -54,7 +55,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			}
 		case 1:
 			if strings.Contains(pContent[1], "정보") {
-				s.ChannelMessageSend(m.ChannelID, fmt.Printf("저는 진원봇 %s 입니다!\n저에 대해선 https://github.com/Dictor/jinwonbot에서 자세히 알아보실수 있어요!\n 참고로 저는 (현실)진원쿤이 만들어준 사이트에서 정보를 끌고온답니다.\n 마찬가지로 https://github.com/ibarami/IsBaramiOpen에서 확인하실 수 있어요!"))
+				s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("저는 진원봇 %s 입니다!\n저에 대해선 https://github.com/Dictor/jinwonbot에서 자세히 알아보실수 있어요!\n 참고로 저는 (현실)진원쿤이 만들어준 사이트에서 정보를 끌고온답니다.\n 마찬가지로 https://github.com/ibarami/IsBaramiOpen에서 확인하실 수 있어요!", version))
 			}
 		}
 	}

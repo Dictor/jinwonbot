@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/dictor/justlog"
 )
 
 const version string = "v1.0.2"
@@ -21,10 +23,8 @@ func checkError(explain string, err error) {
 
 func main() {
 	/* Set logging */
-	log_path, _ := setLogPath() // Ignore error in this line is finally cause panic in set log stream anyway.
-	fp, err := setLogStream(log_path)
-	defer fp.Close()
-	checkError("Set logging", err)
+	log_path := justlog.MustPath(justlog.SetPath())
+	defer (justlog.MustStream(justlog.SetStream(log_path))).Close()
 
 	/* Get CLI flags */
 	var bot_token, web_path string
@@ -35,7 +35,7 @@ func main() {
 	flag.Parse()
 
 	/* Open DB */
-	err = openDB("./db.db")
+	err := openDB("./db.db")
 	checkError("DB Open", err)
 	log.Println("[DB opened successfully]")
 
@@ -76,10 +76,8 @@ func main() {
 			}
 
 			res_time, err := getLatestConditionStatus(!last_status)
-			if err != nil {
-				if err != sql.ErrNoRows {
-					log.Println("[DB Select Error]", err)
-				}
+			if err != nil && err != sql.ErrNoRows {
+				log.Printf("[DB Select Error] %s\n", err)
 			} else {
 				chan_time <- res_time.Time
 			}
