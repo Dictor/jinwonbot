@@ -1,7 +1,6 @@
 package main
 
 import (
-	"database/sql"
 	"flag"
 	"fmt"
 	"log"
@@ -35,7 +34,7 @@ func main() {
 	flag.Parse()
 
 	/* Open DB */
-	err = openDB("./db.db")
+	err = openDB("db/")
 	checkError("DB Open", err)
 	log.Println("[DB opened successfully]")
 
@@ -65,11 +64,9 @@ func main() {
 
 			res_last, err := getLatestStatus()
 			if err != nil {
-				if err != sql.ErrNoRows {
-					log.Println("[DB Select Error]", err)
-				}
+				log.Println("[DB Select Error]", err)
 			} else {
-				if res_last.Status != last_status {
+				if (res_last.Status != last_status) && res_last != nil {
 					last_status = res_last.Status
 					chan_status <- res_last.Status
 				}
@@ -77,10 +74,8 @@ func main() {
 
 			res_time, err := getLatestConditionStatus(!last_status)
 			if err != nil {
-				if err != sql.ErrNoRows {
-					log.Println("[DB Select Error]", err)
-				}
-			} else {
+				log.Println("[DB Select Error]", err)
+			} else if res_time != nil {
 				chan_time <- res_time.Time
 			}
 
