@@ -9,4 +9,5 @@ require (
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/mattn/go-sqlite3 v2.0.2+incompatible
 	github.com/samonzeweb/godb v1.0.13
+	github.com/stretchr/testify v1.6.1
 )
