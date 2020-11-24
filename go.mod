@@ -7,7 +7,6 @@ require (
 	github.com/dictor/justlog v1.1.1
 	github.com/go-git/go-billy/v5 v5.0.0
 	github.com/go-git/go-git/v5 v5.2.0
-	github.com/go-resty/resty/v2 v2.1.0
 	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/mattn/go-sqlite3 v2.0.2+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
