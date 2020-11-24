@@ -18,6 +18,7 @@ type (
 		CommitTime time.Time // Pushed time
 		IsOpen     bool
 		EventTime  time.Time // Time in commit message
+		Hash       string
 	}
 )
 
@@ -57,13 +58,23 @@ func CloneGitRepository(url string) (*git.Repository, error) {
 	return repo, nil
 }
 
-func ListRepositoryCommits(repo *git.Repository) ([]*Commit, error) {
+func ListRepositoryCommits(repo *git.Repository, since time.Time) ([]*Commit, error) {
+	w, err := repo.Worktree()
+	if err != nil {
+		return nil, err
+	}
+
+	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
+	if err != nil {
+		return nil, err
+	}
+
 	headRef, err := repo.Head()
 	if err != nil {
 		return nil, err
 	}
 
-	commitIter, err := repo.Log(&git.LogOptions{From: headRef.Hash()})
+	commitIter, err := repo.Log(&git.LogOptions{From: headRef.Hash(), Since: &since})
 	if err != nil {
 		return nil, err
 	}
@@ -79,6 +90,7 @@ func ListRepositoryCommits(repo *git.Repository) ([]*Commit, error) {
 			CommitTime: c.Committer.When,
 			IsOpen:     open,
 			EventTime:  etime,
+			Hash:       c.Hash.String(),
 		})
 		return nil
 	})
