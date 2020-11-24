@@ -10,8 +10,10 @@ import (
 
 const version string = "v1.0.2"
 
-var currentDoorStatus bool
-var latestChangeTime int64
+var (
+	currentDoorStatus bool
+	latestChangeTime  int64
+)
 
 func checkError(explain string, err error) {
 	if err != nil {
@@ -25,86 +27,63 @@ func main() {
 	defer (justlog.MustStream(justlog.SetStream(log_path))).Close()
 
 	/* Get CLI flags */
-	var bot_token, web_path string
-	var insert_period int
-	flag.StringVar(&bot_token, "t", "", "Bot's Token string")
-	flag.StringVar(&web_path, "w", "https://ibarami.github.io/", "Web path for check door status")
-	flag.IntVar(&insert_period, "d", 60, "Getting web information task's period (second)")
+	var (
+		botToken, repoPath string
+		insertPeriod       int
+	)
+	flag.StringVar(&botToken, "t", "", "Bot's Token string")
+	flag.StringVar(&repoPath, "r", "https://github.com/ibarami/ibarami.github.io", "Repository path for check door status")
+	flag.IntVar(&insertPeriod, "d", 60, "Getting web information task's period (second)")
 	flag.Parse()
 
 	/* Open DB */
 	isNewStore, err := OpenStore("./db.db")
-	checkError("DB Open", err)
-	log.Println("[DB opened successfully]")
+	checkError("store open", err)
+	log.Println("commit store opened successfully!")
 
 	/* Start discord bot */
-	err = startBot(bot_token)
-	checkError("Starting bot", err)
-	log.Println("[Bot started successfully]")
+	err = startBot(botToken)
+	checkError("starting bot", err)
+	log.Println("discord bot started successfully!")
 
 	/* Get github information */
-	repo, err := CloneGitRepository("https://github.com/ibarami/ibarami.github.io")
-	checkError("Clone repo", err)
+	repo, err := CloneGitRepository(repoPath)
+	checkError("clone repo", err)
 	if isNewStore {
+		log.Println("there isn't saved commit store. creating...")
 		commits, err := ListRepositoryCommits(repo, time.Time{})
-		checkError("Get commits", err)
-		checkError("Update DB", AppendStore(commits...))
-		checkError("Save DB", SaveStore())
+		checkError("get commits", err)
+		log.Printf("%d commits retieved!", len(commits))
+		checkError("append store", AppendStore(commits...))
+		checkError("save store", SaveStore())
 	}
-
-	chan_change_status := make(chan bool)
-	chan_change_time := make(chan int64)
-
-	go func(chan_status chan bool, chan_time chan int64) {
-		var last_status bool
-		for {
-
-			commit, err := SelectLatestCommit()
-			if err != nil {
-				log.Println("[Commit retrieve error]", err)
-			}
-			repo, err = CloneGitRepository("https://github.com/ibarami/ibarami.github.io")
-			if err != nil {
-				log.Println("[repo clone error]", err)
-			}
-			commits, err := ListRepositoryCommits(repo, commit.CommitTime)
-			if err != nil {
-				log.Println("[Commit select error]", err)
-			}
-			if len(commits) > 0 {
-				err := AppendStore(commits...)
-				if err != nil {
-					log.Println("[append store error]", err)
-				}
-				err = SaveStore()
-				if err != nil {
-					log.Println("[save store error]", err)
-				}
-			}
-
-			if err != nil {
-				log.Println("[DB Select Error]", err)
-			}
-			if commit.IsOpen != last_status {
-				last_status = commit.IsOpen
-				chan_status <- commit.IsOpen
-			}
-
-			scommit, err := SelectLatestStatus(last_status)
-			if err != nil {
-				log.Println("[DB Select Error]", err)
-			}
-			chan_time <- scommit.CommitTime.Unix()
-
-			time.Sleep(time.Duration(insert_period) * time.Second)
-		}
-	}(chan_change_status, chan_change_time)
+	log.Println("github repo cloned successfully!")
 
 	for {
-		select {
-		case currentDoorStatus = <-chan_change_status:
-			log.Println("[Status changed] →", currentDoorStatus)
-		case latestChangeTime = <-chan_change_time:
+		lcommit, err := SelectLatestCommit()
+		if err != nil {
+			log.Printf("SelectLatestCommit: %s", err)
 		}
+		currentDoorStatus = lcommit.IsOpen
+
+		scommit, err := SelectLatestStatus(lcommit.IsOpen)
+		if err != nil {
+			log.Printf("SelectLatestCommit: %s", err)
+		}
+		latestChangeTime = scommit.CommitTime.Unix()
+
+		commits, err := ListRepositoryCommits(repo, lcommit.CommitTime)
+		if err != nil {
+			log.Printf("ListRepositoryCommits: %s", err)
+		} else if len(commits) > 0 {
+			if err := AppendStore(commits...); err != nil {
+				log.Printf("AppendStore: %s", err)
+			}
+			if err := SaveStore(); err != nil {
+				log.Printf("SaveStore: %s", err)
+			}
+		}
+
+		time.Sleep(time.Second * time.Duration(insertPeriod))
 	}
 }
