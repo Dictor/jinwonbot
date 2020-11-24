@@ -8,6 +8,7 @@ import (
 
 	"log"
 
+	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/storage/memory"
@@ -48,7 +49,7 @@ func parseCommitMessage(message string) (eventTime time.Time, isOpen bool, err e
 }
 
 func CloneGitRepository(url string) (*git.Repository, error) {
-	repo, err := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{
+	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL:        url,
 		RemoteName: "master",
 	})
@@ -63,9 +64,7 @@ func ListRepositoryCommits(repo *git.Repository, since time.Time) ([]*Commit, er
 	if err != nil {
 		return nil, err
 	}
-
-	err = w.Pull(&git.PullOptions{RemoteName: "origin"})
-	if err != nil {
+	if err := w.Pull(&git.PullOptions{RemoteName: "master"}); err != nil && err != git.NoErrAlreadyUpToDate {
 		return nil, err
 	}
 
@@ -73,14 +72,13 @@ func ListRepositoryCommits(repo *git.Repository, since time.Time) ([]*Commit, er
 	if err != nil {
 		return nil, err
 	}
-
 	commitIter, err := repo.Log(&git.LogOptions{From: headRef.Hash(), Since: &since})
 	if err != nil {
 		return nil, err
 	}
 
 	res := []*Commit{}
-	err = commitIter.ForEach(func(c *object.Commit) error {
+	if err := commitIter.ForEach(func(c *object.Commit) error {
 		etime, open, err := parseCommitMessage(c.Message)
 		if err != nil {
 			log.Println(err)
@@ -93,10 +91,8 @@ func ListRepositoryCommits(repo *git.Repository, since time.Time) ([]*Commit, er
 			Hash:       c.Hash.String(),
 		})
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, err
 	}
-
-	return res, err
+	return res, nil
 }
