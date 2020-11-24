@@ -8,7 +8,9 @@ import (
 )
 
 func TestGetFullCommits(t *testing.T) {
-	commits, err := getFullCommits()
+	repo, err := CloneGitRepository("https://github.com/ibarami/ibarami.github.io")
 	assert.NoError(t, err)
-	fmt.Println(commits)
+	commits, err := ListRepositoryCommits(repo)
+	assert.NoError(t, err)
+	fmt.Printf("%d commits retireved.", len(commits))
 }

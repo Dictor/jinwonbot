@@ -1,14 +1,16 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/go-resty/resty/v2"
+	"log"
+
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/object"
+	"github.com/go-git/go-git/v5/storage/memory"
 )
 
 type (
@@ -19,41 +21,10 @@ type (
 	}
 )
 
-const apiCallDelay = 100 * time.Millisecond
-
-func getFullCommits() ([]*Commit, error) {
-	page := 0
-	res := []*Commit{}
-	for {
-		data, err := callCommitAPI(page)
-		if err != nil {
-			return nil, err
-		}
-		if len(data) == 0 {
-			break
-		}
-
-		for _, commit := range data {
-			commitData := commit.(map[string]interface{})["commit"].(map[string]interface{})
-			commitMessage := commitData["message"].(string)
-			etime, open, err := parseCommitMessage(commitMessage)
-			if err != nil {
-				return nil, err
-			}
-			ctime, err := time.Parse(time.RFC3339, commitData["committer"].(map[string]interface{})["date"].(string))
-			if err != nil {
-				return nil, err
-			}
-			res = append(res, &Commit{CommitTime: ctime, IsOpen: open, EventTime: etime})
-		}
-	}
-	return res, nil
-}
-
 func parseCommitMessage(message string) (eventTime time.Time, isOpen bool, err error) {
 	words := strings.Split(message, " ")
 	if len(words) != 3 {
-		err = errors.New(fmt.Sprintf("parseCommitMessage: expected 3 words in commit message, but %d existed.", len(words)))
+		err = errors.New(fmt.Sprintf("parseCommitMessage: expected 3 words in commit message, but %d existed. (msg: %s)", len(words), message))
 		return
 	}
 
@@ -62,7 +33,7 @@ func parseCommitMessage(message string) (eventTime time.Time, isOpen bool, err e
 	} else if words[2] == "열림" {
 		isOpen = true
 	} else {
-		err = errors.New(fmt.Sprintf("parseCommitMessage: unknown door status message : %s", words[2]))
+		err = errors.New(fmt.Sprintf("parseCommitMessage: unknown door status message : %s. (msg: %s)", words[2], message))
 		return
 	}
 
@@ -75,17 +46,45 @@ func parseCommitMessage(message string) (eventTime time.Time, isOpen bool, err e
 	return
 }
 
-func callCommitAPI(page int) ([]interface{}, error) {
-	client := resty.New()
-	resp, err := client.R().
-		EnableTrace().
-		Get("https://api.github.com/repos/ibarami/ibarami.github.io/commits?page=" + strconv.Itoa(page))
+func CloneGitRepository(url string) (*git.Repository, error) {
+	repo, err := git.Clone(memory.NewStorage(), nil, &git.CloneOptions{
+		URL:        url,
+		RemoteName: "master",
+	})
 	if err != nil {
 		return nil, err
 	}
-	body := []interface{}{}
-	if err := json.Unmarshal(resp.Body(), &body); err != nil {
+	return repo, nil
+}
+
+func ListRepositoryCommits(repo *git.Repository) ([]*Commit, error) {
+	headRef, err := repo.Head()
+	if err != nil {
 		return nil, err
 	}
-	return body, nil
+
+	commitIter, err := repo.Log(&git.LogOptions{From: headRef.Hash()})
+	if err != nil {
+		return nil, err
+	}
+
+	res := []*Commit{}
+	err = commitIter.ForEach(func(c *object.Commit) error {
+		etime, open, err := parseCommitMessage(c.Message)
+		if err != nil {
+			log.Println(err)
+			return nil
+		}
+		res = append(res, &Commit{
+			CommitTime: c.Committer.When,
+			IsOpen:     open,
+			EventTime:  etime,
+		})
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return res, err
 }
