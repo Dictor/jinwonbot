@@ -23,6 +23,10 @@ type (
 	}
 )
 
+func (c Commit) String() string {
+	return fmt.Sprintf("감지 시간 %s → 커밋 시간 %s 개방?=%t (해시 %s)", c.EventTime, c.CommitTime, c.IsOpen, c.Hash[0:6])
+}
+
 func parseCommitMessage(message string) (eventTime time.Time, isOpen bool, err error) {
 	words := strings.Split(message, " ")
 	if len(words) != 3 {

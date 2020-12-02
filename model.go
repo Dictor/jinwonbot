@@ -152,3 +152,8 @@ func SelectLatestStatus(status bool) (*Commit, error) {
 
 	return latestCommit, nil
 }
+
+// GetAllCommits return slice of whole commits in store
+func GetAllCommits() *[]*Commit {
+	return &currentStore.Commits
+}
