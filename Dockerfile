@@ -1,7 +1,8 @@
 FROM golang:1.14-alpine
 
-ADD ./ /jinwonbot
+ADD . /jinwonbot
 WORKDIR "/jinwonbot"
-RUN ["go", "build"]
+RUN apk add --no-cache --update bash make git
+RUN ["make", "build"]
 ENTRYPOINT ["/bin/sh", "-c"]
 CMD ["/jinwonbot/jinwonbot -t $DISCORD_TOKEN"]
