@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -15,6 +14,7 @@ import (
 )
 
 type (
+	// Commit is model of each git commits.
 	Commit struct {
 		CommitTime time.Time // Pushed time
 		IsOpen     bool
@@ -26,7 +26,7 @@ type (
 func parseCommitMessage(message string) (eventTime time.Time, isOpen bool, err error) {
 	words := strings.Split(message, " ")
 	if len(words) != 3 {
-		err = errors.New(fmt.Sprintf("parseCommitMessage: expected 3 words in commit message, but %d existed. (msg: %s)", len(words), message))
+		err = fmt.Errorf("parseCommitMessage: expected 3 words in commit message, but %d existed. (msg: %s)", len(words), message)
 		return
 	}
 
@@ -35,7 +35,7 @@ func parseCommitMessage(message string) (eventTime time.Time, isOpen bool, err e
 	} else if words[2] == "열림" {
 		isOpen = true
 	} else {
-		err = errors.New(fmt.Sprintf("parseCommitMessage: unknown door status message : %s. (msg: %s)", words[2], message))
+		err = fmt.Errorf("parseCommitMessage: unknown door status message : %s. (msg: %s)", words[2], message)
 		return
 	}
 
@@ -48,6 +48,7 @@ func parseCommitMessage(message string) (eventTime time.Time, isOpen bool, err e
 	return
 }
 
+// CloneGitRepository returns repository object from given git repository url
 func CloneGitRepository(url string) (*git.Repository, error) {
 	repo, err := git.Clone(memory.NewStorage(), memfs.New(), &git.CloneOptions{
 		URL:        url,
@@ -59,6 +60,7 @@ func CloneGitRepository(url string) (*git.Repository, error) {
 	return repo, nil
 }
 
+// ListRepositoryCommits returns whole commits in given repository
 func ListRepositoryCommits(repo *git.Repository, since time.Time) ([]*Commit, error) {
 	w, err := repo.Worktree()
 	if err != nil {

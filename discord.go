@@ -12,10 +12,10 @@ import (
 
 var currentSession *discordgo.Session
 
-func startBot(bot_token string) error {
+func startBot(botToken string) error {
 	var err error = nil
 
-	currentSession, err = discordgo.New("Bot " + bot_token)
+	currentSession, err = discordgo.New("Bot " + botToken)
 	if err != nil {
 		return err
 	}
@@ -58,13 +58,13 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				Type:  discordgo.EmbedTypeRich,
 				Title: "진원쿤 정보",
 				Fields: []*discordgo.MessageEmbedField{
-					&discordgo.MessageEmbedField{"버전", fmt.Sprintf("`%s (%s) - %s`", gitTag, gitHash[0:6], buildDate), false},
-					&discordgo.MessageEmbedField{"제작자", "25기 김정현 (kimdictor@gmail.com)", true},
-					&discordgo.MessageEmbedField{"소스코드", "https://github.com/Dictor/jinwonbot", true},
-					&discordgo.MessageEmbedField{"데이터 수집, 제공", "24기 주진원 (https://github.com/MainEpicenter)", true},
+					{Name: "버전", Value: fmt.Sprintf("`%s (%s) - %s`", gitTag, gitHash[0:6], buildDate), Inline: false},
+					{Name: "제작자", Value: "[25기 김정현](https://github.com/Dictor)", Inline: true},
+					{Name: "소스코드", Value: "[깃헙 저장소](https://github.com/Dictor/jinwonbot)", Inline: true},
+					{Name: "데이터 수집, 제공", Value: "[24기 주진원](https://github.com/MainEpicenter)", Inline: true},
 				},
 				Footer: &discordgo.MessageEmbedFooter{
-					Text: "바라미실에 설치된 하드웨어 (https://github.com/ibarami/IsBaramiOpen)를 통해 수집한 정보를 제공하는 웹페이지 (https://ibarami.github.io)를 크롤링하여 정보를 제공하고 있습니다.",
+					Text: "바라미실에 설치된 하드웨어(https://github.com/ibarami/IsBaramiOpen)를 통해 수집한 정보를 제공하는 웹페이지 (https://ibarami.github.io)를 크롤링하여 정보를 제공하고 있습니다.",
 				},
 			})
 		} else if strings.Contains(pContent[1], "도움말") {
@@ -72,9 +72,9 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				Type:  discordgo.EmbedTypeRich,
 				Title: "진원쿤 명령어",
 				Fields: []*discordgo.MessageEmbedField{
-					&discordgo.MessageEmbedField{"정보 보기", "진원쿤 정보", true},
-					&discordgo.MessageEmbedField{"바라미실 문 상태 확인", "진원쿤", true},
-					&discordgo.MessageEmbedField{"도움말 보기", "진원쿤 도움말", true},
+					{Name: "정보 보기", Value: "`진원쿤 정보`", Inline: true},
+					{Name: "바라미실 문 상태 확인", Value: "`진원쿤`", Inline: true},
+					{Name: "도움말 보기", Value: "`진원쿤 도움말`", Inline: true},
 				},
 			})
 		}

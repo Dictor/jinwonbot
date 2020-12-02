@@ -8,6 +8,7 @@ import (
 )
 
 type (
+	// CommitStore is commits storing json store
 	CommitStore struct {
 		Version int64
 		Commits []*Commit
@@ -20,6 +21,7 @@ var (
 	lastUpdateVersion int64
 )
 
+// OpenStore open commit store. When there is no file in path, create new store on the path.
 func OpenStore(path string) (isNew bool, openError error) {
 	if currentStore != nil {
 		openError = errors.New("commit store is already opened")
@@ -58,6 +60,7 @@ func OpenStore(path string) (isNew bool, openError error) {
 	return
 }
 
+// AppendStore append given commits in commit store
 func AppendStore(commits ...*Commit) error {
 	if currentStore == nil {
 		return errors.New("there is no opened store")
@@ -68,6 +71,7 @@ func AppendStore(commits ...*Commit) error {
 	return nil
 }
 
+// SaveStore save commit store to file system
 func SaveStore() error {
 	if currentStore == nil {
 		return errors.New("there is no opened store")
@@ -101,6 +105,7 @@ func SaveStore() error {
 	return nil
 }
 
+// CloseStore close and free commit store
 func CloseStore() error {
 	if err := SaveStore(); err != nil {
 		return err
@@ -110,6 +115,7 @@ func CloseStore() error {
 	return nil
 }
 
+// SelectLatestCommit returns latest commit
 func SelectLatestCommit() (*Commit, error) {
 	tcommit, err := SelectLatestStatus(true)
 	if err != nil {
@@ -127,6 +133,7 @@ func SelectLatestCommit() (*Commit, error) {
 	}
 }
 
+// SelectLatestStatus returns latest commits matched with given condition
 func SelectLatestStatus(status bool) (*Commit, error) {
 	if len(currentStore.Commits) < 2 {
 		return nil, errors.New("there is no commit to select in store")

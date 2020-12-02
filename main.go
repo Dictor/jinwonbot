@@ -22,8 +22,8 @@ func checkError(explain string, err error) {
 
 func main() {
 	/* Set logging */
-	log_path := justlog.MustPath(justlog.SetPath())
-	defer (justlog.MustStream(justlog.SetStream(log_path))).Close()
+	logPath := justlog.MustPath(justlog.SetPath())
+	defer (justlog.MustStream(justlog.SetStream(logPath))).Close()
 	log.Printf("jinwonbot %s (%s) - %s", gitTag, gitHash, buildDate)
 
 	/* Get CLI flags */
