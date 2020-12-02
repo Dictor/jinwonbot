@@ -8,11 +8,10 @@ import (
 	"github.com/dictor/justlog"
 )
 
-const version string = "v1.0.2"
-
 var (
-	currentDoorStatus bool
-	latestChangeTime  int64
+	gitTag, gitHash, buildDate string // build flags
+	currentDoorStatus          bool   // latest door status
+	latestChangeTime           int64  // latest door status changed timestamp
 )
 
 func checkError(explain string, err error) {
@@ -25,6 +24,7 @@ func main() {
 	/* Set logging */
 	log_path := justlog.MustPath(justlog.SetPath())
 	defer (justlog.MustStream(justlog.SetStream(log_path))).Close()
+	log.Printf("jinwonbot %s (%s) - %s", gitTag, gitHash, buildDate)
 
 	/* Get CLI flags */
 	var (

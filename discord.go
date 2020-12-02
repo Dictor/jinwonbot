@@ -37,16 +37,16 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			answer := "지금 바라미실은 "
 			if latestChangeTime == 0 {
 				if currentDoorStatus {
-					answer += "열려있습니다!, 언제 열렸는지는 잘 모르겠어요 ㅠㅠ"
+					answer += "열려있습니다! 언제 열렸는지는 잘 모르겠어요 ㅠㅠ"
 				} else {
-					answer += "닫혀있습니다!, 언제 닫혔는지는 잘 모르겠어요 ㅠㅠ"
+					answer += "닫혀있습니다! 언제 닫혔는지는 잘 모르겠어요 ㅠㅠ"
 				}
 			} else {
 				timeString := formatSecond(int64(time.Now().Sub(time.Unix(latestChangeTime, 0)).Seconds()))
 				if currentDoorStatus {
-					answer += fmt.Sprintf("열려있습니다!, %s전에 열렸어요!", timeString)
+					answer += fmt.Sprintf("열려있습니다! %s전에 열렸어요!", timeString)
 				} else {
-					answer += fmt.Sprintf("닫혀있습니다!, %s전에 닫혔어요!", timeString)
+					answer += fmt.Sprintf("닫혀있습니다! %s전에 닫혔어요!", timeString)
 				}
 			}
 			log.Printf("[Message Send](%s-%s): %s → %s \n", m.Author.ID, m.Author.Username, m.Content, answer)
@@ -54,7 +54,29 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	case 2:
 		if strings.Contains(pContent[1], "정보") {
-			s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("저는 진원봇 %s 입니다!\n저에 대해선 https://github.com/Dictor/jinwonbot 에서 자세히 알아보실수 있어요!\n참고로 저는 (현실)진원쿤이 만들어준 사이트( https://github.com/ibarami/IsBaramiOpen )에서 정보를 끌고온답니다!!", version))
+			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+				Type:  discordgo.EmbedTypeRich,
+				Title: "진원쿤 정보",
+				Fields: []*discordgo.MessageEmbedField{
+					&discordgo.MessageEmbedField{"버전", fmt.Sprintf("`%s (%s) - %s`", gitTag, gitHash[0:6], buildDate), false},
+					&discordgo.MessageEmbedField{"제작자", "25기 김정현 (kimdictor@gmail.com)", true},
+					&discordgo.MessageEmbedField{"소스코드", "https://github.com/Dictor/jinwonbot", true},
+					&discordgo.MessageEmbedField{"데이터 수집, 제공", "24기 주진원 (https://github.com/MainEpicenter)", true},
+				},
+				Footer: &discordgo.MessageEmbedFooter{
+					Text: "바라미실에 설치된 하드웨어 (https://github.com/ibarami/IsBaramiOpen)를 통해 수집한 정보를 제공하는 웹페이지 (https://ibarami.github.io)를 크롤링하여 정보를 제공하고 있습니다.",
+				},
+			})
+		} else if strings.Contains(pContent[1], "도움말") {
+			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+				Type:  discordgo.EmbedTypeRich,
+				Title: "진원쿤 명령어",
+				Fields: []*discordgo.MessageEmbedField{
+					&discordgo.MessageEmbedField{"정보 보기", "진원쿤 정보", true},
+					&discordgo.MessageEmbedField{"바라미실 문 상태 확인", "진원쿤", true},
+					&discordgo.MessageEmbedField{"도움말 보기", "진원쿤 도움말", true},
+				},
+			})
 		}
 	}
 }
