@@ -5,8 +5,6 @@ import (
 	"strings"
 	"time"
 
-	"log"
-
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/object"
@@ -87,7 +85,7 @@ func ListRepositoryCommits(repo *git.Repository, since time.Time) ([]*Commit, er
 	if err := commitIter.ForEach(func(c *object.Commit) error {
 		etime, open, err := parseCommitMessage(c.Message)
 		if err != nil {
-			log.Println(err)
+			GlobalLogger.Debugln(err)
 			return nil
 		}
 		res = append(res, &Commit{

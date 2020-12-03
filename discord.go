@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -49,7 +48,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					answer += fmt.Sprintf("닫혀있습니다! %s전에 닫혔어요!", timeString)
 				}
 			}
-			log.Printf("[Message Send](%s-%s): %s → %s \n", m.Author.ID, m.Author.Username, m.Content, answer)
+			GlobalLogger.Infof("[Message Send](%s-%s): %s → %s \n", m.Author.ID, m.Author.Username, m.Content, answer)
 			s.ChannelMessageSend(m.ChannelID, answer)
 		}
 	case 2:
