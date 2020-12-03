@@ -16,10 +16,10 @@ import (
 type (
 	// Commit is model of each git commits.
 	Commit struct {
-		CommitTime time.Time // Pushed time
-		IsOpen     bool
-		EventTime  time.Time // Time in commit message
-		Hash       string
+		CommitTime time.Time `json:"commit_time"` // Pushed time
+		IsOpen     bool      `json:"is_open"`
+		EventTime  time.Time `json:"event_time"` // Time in commit message
+		Hash       string    `json:"hash"`
 	}
 )
 

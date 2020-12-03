@@ -71,6 +71,9 @@ func main() {
 	go UpdateStatusLoop(repo, insertPeriod)
 
 	/* Start web server */
+	e.GET("/version", ReadVersion)
+	e.GET("/commit", ReadCommit)
+	e.GET("/latest", ReadLatestCommit)
 	e.Logger.Fatal(e.Start(listenPath))
 }
 

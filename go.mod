@@ -13,6 +13,7 @@ require (
 	github.com/mattn/go-sqlite3 v2.0.2+incompatible // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/samonzeweb/godb v1.0.13
+	github.com/sirupsen/logrus v1.4.2
 	github.com/smartystreets/goconvey v1.6.4 // indirect
 	github.com/stretchr/testify v1.6.1
 	gopkg.in/yaml.v2 v2.3.0 // indirect
