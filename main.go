@@ -1,9 +1,10 @@
 package main
 
 import (
-	"flag"
 	"log"
 	"time"
+
+	"github.com/namsral/flag"
 
 	elogrus "github.com/dictor/echologrus"
 	"github.com/go-git/go-git/v5"

@@ -11,6 +11,7 @@ require (
 	github.com/google/go-cmp v0.4.0 // indirect
 	github.com/labstack/echo/v4 v4.1.17
 	github.com/mattn/go-sqlite3 v2.0.2+incompatible // indirect
+	github.com/namsral/flag v1.7.4-pre
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/samonzeweb/godb v1.0.13
 	github.com/sirupsen/logrus v1.4.2
