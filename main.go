@@ -40,9 +40,9 @@ func main() {
 		botToken, repoPath, storePath, listenPath string
 		insertPeriod                              int
 	)
-	flag.StringVar(&botToken, "t", "", "Bot's Token string")
+	flag.StringVar(&botToken, "token", "", "Bot's Token string")
 	flag.StringVar(&repoPath, "repo", "https://github.com/ibarami/ibarami.github.io", "Repository path for check door status")
-	flag.IntVar(&insertPeriod, "d", 60, "Getting web information task's period (second)")
+	flag.IntVar(&insertPeriod, "delay", 60, "Getting web information task's period (second)")
 	flag.StringVar(&storePath, "store", "./db.db", "Commit store file's path")
 	flag.StringVar(&listenPath, "listen", ":80", "Listen address for web server")
 	flag.Parse()
