@@ -76,13 +76,16 @@ func ListRepositoryCommits(repo *git.Repository, since time.Time) ([]*Commit, er
 	if err != nil {
 		return nil, err
 	}
-	commitIter, err := repo.Log(&git.LogOptions{From: headRef.Hash(), Since: &since})
+	commitIter, err := repo.Log(&git.LogOptions{From: headRef.Hash()})
 	if err != nil {
 		return nil, err
 	}
 
 	res := []*Commit{}
 	if err := commitIter.ForEach(func(c *object.Commit) error {
+		if c.Committer.When.Before(since) {
+			return nil
+		}
 		etime, open, err := parseCommitMessage(c.Message)
 		if err != nil {
 			GlobalLogger.Debugln(err)
