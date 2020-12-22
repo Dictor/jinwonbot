@@ -83,7 +83,7 @@ func ListRepositoryCommits(repo *git.Repository, since time.Time) ([]*Commit, er
 
 	res := []*Commit{}
 	if err := commitIter.ForEach(func(c *object.Commit) error {
-		if c.Committer.When.Before(since) {
+		if c.Committer.When.Before(since) || c.Committer.When.Equal(since) {
 			return nil
 		}
 		etime, open, err := parseCommitMessage(c.Message)
