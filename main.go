@@ -37,11 +37,12 @@ func main() {
 	/* Get CLI flags */
 	var (
 		botToken, repoPath, storePath, listenPath string
-		insertPeriod                              int
+		insertPeriod, uniquePeriod                int
 	)
 	flag.StringVar(&botToken, "token", "", "Bot's Token string")
 	flag.StringVar(&repoPath, "repo", "https://github.com/ibarami/ibarami.github.io", "Repository path for check door status")
-	flag.IntVar(&insertPeriod, "delay", 60, "Getting web information task's period (second)")
+	flag.IntVar(&insertPeriod, "idelay", 60, "Getting web information task's period (second)")
+	flag.IntVar(&uniquePeriod, "udelay", 86400, "Commit store uniqueness check task's period (second)")
 	flag.StringVar(&storePath, "store", "./db.db", "Commit store file's path")
 	flag.StringVar(&listenPath, "listen", ":80", "Listen address for web server")
 	flag.Parse()
@@ -69,6 +70,7 @@ func main() {
 	}
 	GlobalLogger.Infof("github repo cloned successfully!")
 	go UpdateStatusLoop(repo, insertPeriod)
+	go FixUniquenessLoop(uniquePeriod)
 
 	/* Start web server */
 	e.GET("/version", ReadVersion)
