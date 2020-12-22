@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"time"
 
 	"github.com/namsral/flag"
@@ -83,27 +82,41 @@ func UpdateStatusLoop(repo *git.Repository, delayPeriod int) {
 	for {
 		lcommit, err := SelectLatestCommit()
 		if err != nil {
-			log.Printf("SelectLatestCommit: %s", err)
+			GlobalLogger.Errorf("SelectLatestCommit: %s", err)
 		}
 		currentDoorStatus = lcommit.IsOpen
 
 		scommit, err := SelectLatestStatus(lcommit.IsOpen)
 		if err != nil {
-			log.Printf("SelectLatestCommit: %s", err)
+			GlobalLogger.Errorf("SelectLatestCommit: %s", err)
 		}
 		latestChangeTime = scommit.CommitTime.Unix()
 
 		commits, err := ListRepositoryCommits(repo, lcommit.CommitTime)
 		if err != nil {
-			log.Printf("ListRepositoryCommits: %s", err)
+			GlobalLogger.Errorf("ListRepositoryCommits: %s", err)
 		} else if len(commits) > 0 {
 			if err := AppendStore(commits...); err != nil {
-				log.Printf("AppendStore: %s", err)
+				GlobalLogger.Errorf("AppendStore: %s", err)
 			}
 			if err := SaveStore(); err != nil {
-				log.Printf("SaveStore: %s", err)
+				GlobalLogger.Errorf("SaveStore: %s", err)
 			}
 		}
+
+		time.Sleep(time.Second * time.Duration(delayPeriod))
+	}
+}
+
+func FixUniquenessLoop(delayPeriod int) {
+	for {
+		beforeCnt := len(*GetAllCommits())
+		err := FixUniqueness()
+		afterCnt := len(*GetAllCommits())
+		if err != nil {
+			GlobalLogger.Errorf("FixUniqueness: %s", err)
+		}
+		GlobalLogger.Infof("FixUniqueness %d duplicated commits are fixed", beforeCnt-afterCnt)
 
 		time.Sleep(time.Second * time.Duration(delayPeriod))
 	}

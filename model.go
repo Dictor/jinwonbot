@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"sync"
 )
 
 type (
@@ -12,6 +13,7 @@ type (
 	CommitStore struct {
 		Version int64
 		Commits []*Commit
+		Lock    *sync.Mutex `json:"-"` //Write sync mutex
 	}
 )
 
@@ -57,6 +59,7 @@ func OpenStore(path string) (isNew bool, openError error) {
 		openError = err
 		return
 	}
+	currentStore.Lock = &sync.Mutex{}
 	return
 }
 
@@ -66,8 +69,10 @@ func AppendStore(commits ...*Commit) error {
 		return errors.New("there is no opened store")
 	}
 
+	currentStore.Lock.Lock()
 	currentStore.Commits = append(currentStore.Commits, commits...)
 	currentStore.Version++
+	currentStore.Lock.Unlock()
 	return nil
 }
 
@@ -156,4 +161,33 @@ func SelectLatestStatus(status bool) (*Commit, error) {
 // GetAllCommits return slice of whole commits in store
 func GetAllCommits() *[]*Commit {
 	return &currentStore.Commits
+}
+
+func FixUniqueness() error {
+	if currentStore == nil {
+		return errors.New("there is no opened store")
+	}
+
+	existHash := []string{}
+	uniqueCommits := []*Commit{}
+	cs := GetAllCommits()
+	for _, c := range *cs {
+		if !contains(existHash, c.Hash) {
+			existHash = append(existHash, c.Hash)
+			uniqueCommits = append(uniqueCommits, c)
+		}
+	}
+	currentStore.Lock.Lock()
+	currentStore.Commits = uniqueCommits
+	currentStore.Lock.Unlock()
+	return nil
+}
+
+func contains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
 }
