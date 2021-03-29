@@ -30,15 +30,15 @@ CDS가 표시등 이외 주변 불빛을 감지하지 못하게 방지하는 차
 
 ## 시연 사진
 디스코드 프론트엔드 (바라미 디스코드방이나 진원쿤#5014에게 직접 메세지를 보내 사용해보실 수 있습니다.)
-![demo/discord1.png](Discord bot demo) 
-![demo/discord2.png](Discord bot demo) 
+![Discord bot demo](demo/discord1.png)
+![Discord bot demo](demo/discord2.png)
 
 웹 프론트엔드 (<a href="https://ibarami.github.io" target="_blank"> https://ibarami.github.io</a> 에서 직접 사용해보실 수 있습니다.)
-![demo/web1.png](WEB frontend demo)
+![WEB frontend demo](demo/web1.png)
 
 REST API 예시 (<a href="https://api.chinchister.com/jinwonbot/" target="_blank">https://api.chinchister.com/jinwonbot/</a>에서 직접 사용해보실 수 있습니다. <a href="https://github.com/Dictor/jinwonbot/blob/master/docs/api.md" target="_blank">API 명세서</a> )
    
-![demo/rest.png](REST API demo)
+![REST API demo](demo/rest.png)
 
 ## FAQ
 - **왜 백앤드에서 센서 감지까지 한 번에 수행하지 않고 센서 감지부와 백앤드가 분리된 구조인가요?** : 원래 진원 선배가 제작한 센서와 웹 프론트엔드만 존재하던 독립적인 작품이였습니다. 거기에 제가 원래 작품의 구조를 유지하면서 추가적으로 여러 가지 기능을 구현하다보니 지금과 같은 구조를 가지게 되었습니다. 덕분에 복잡성은 조금 증가했지만 개폐 기록에 대한 데이터베이스와 프론트앤드를 제공하는 서버가 이중 구조를 띄어 내고장성이 향상되었습니다.
