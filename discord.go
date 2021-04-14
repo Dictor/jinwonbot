@@ -105,6 +105,19 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					{Name: "최근 5개 기록", Value: recentCommits, Inline: false},
 				},
 			})
+		} else if strings.Contains(pContent[1], "윤성") {
+			count := 0
+			if _, err := fmt.Sscanf(pContent[1], "윤성%d", &count); err != nil {
+				s.ChannelMessageSend(m.ChannelID, "제가 알아들을 수 없는 값은 값인 것 같아요 ㅠㅠ")
+				return
+			}
+			if count > 10 {
+				s.ChannelMessageSend(m.ChannelID, "뇌절 멈춰!")
+				return
+			}
+			for i := 1; i <= 10; i++ {
+				s.ChannelMessageSend(m.ChannelID, "!현석 윤성")
+			}
 		}
 	}
 }
