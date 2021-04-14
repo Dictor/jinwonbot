@@ -118,8 +118,9 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				s.ChannelMessageSend(m.ChannelID, "뇌절 멈춰!")
 				return
 			}
-			for i := 1; i <= 10; i++ {
+			for i := 1; i <= count; i++ {
 				s.ChannelMessageSend(m.ChannelID, "!현석 윤성")
+				time.Sleep(time.Second * 1)
 			}
 		}
 	}
