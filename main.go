@@ -52,6 +52,11 @@ func main() {
 	mustAction("store open", err)
 	GlobalLogger.Infoln("commit store opened successfully!")
 
+	/* Read ascii art */
+	if err := readYsArt(); err != nil {
+		GlobalLogger.WithError(err).Errorln("fail to read ascii art")
+	}
+
 	/* Start discord bot */
 	err = startBot(botToken)
 	mustAction("start bot", err)

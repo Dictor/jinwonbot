@@ -109,19 +109,11 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				},
 			})
 		} else if strings.Contains(pContent[1], "윤성") {
-			count := 0
-			if _, err := fmt.Sscanf(pContent[1], "윤성%d", &count); err != nil {
-				s.ChannelMessageSend(m.ChannelID, "제가 알아들을 수 없는 값인 것 같아요 ㅠㅠ")
+			if len(ysArt) == 0 {
+				s.ChannelMessageSend(m.ChannelID, "엥? 뭔가 문제가 있는데요...")
 				return
 			}
-			if count > 10 {
-				s.ChannelMessageSend(m.ChannelID, "뇌절 멈춰!")
-				return
-			}
-			for i := 1; i <= count; i++ {
-				s.ChannelMessageSend(m.ChannelID, "!현석 윤성")
-				time.Sleep(time.Second * 1)
-			}
+			s.ChannelMessageSend(m.ChannelID, ysArt)
 		}
 	}
 }
