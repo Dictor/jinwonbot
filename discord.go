@@ -120,11 +120,10 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				return
 			}
 			logSendResult(s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-				Type: discordgo.EmbedTypeArticle,
-				Fields: []*discordgo.MessageEmbedField{
-					{Value: ysArt},
-				},
-			}))
+				Type:        discordgo.EmbedTypeArticle,
+				Description: ysArt,
+			},
+			))
 		}
 	}
 }
