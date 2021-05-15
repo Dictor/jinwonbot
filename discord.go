@@ -119,7 +119,12 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				logSendResult(s.ChannelMessageSend(m.ChannelID, "엥? 뭔가 문제가 있는데요..."))
 				return
 			}
-			logSendResult(s.ChannelMessageSend(m.ChannelID, ysArt))
+			logSendResult(s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+				Type: discordgo.EmbedTypeArticle,
+				Fields: []*discordgo.MessageEmbedField{
+					{Value: ysArt},
+				},
+			}))
 		}
 	}
 }
