@@ -7,6 +7,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/sirupsen/logrus"
 )
 
 var currentSession *discordgo.Session
@@ -28,7 +29,13 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if m.Author.ID == s.State.User.ID { // Ignore bot's itself message
 		return
 	}
-
+	if strings.Contains(m.Content, "진원쿤") {
+		GlobalLogger.WithFields(logrus.Fields{
+			"author_id":   m.Author.ID,
+			"author_name": m.Author.Username,
+			"content":     m.Content,
+		}).Infoln("bot is called")
+	}
 	pContent := strings.Split(m.Content, " ")
 	switch len(pContent) {
 	case 1:
@@ -48,15 +55,14 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					answer += fmt.Sprintf("닫혀있습니다! %s전에 닫혔어요!", timeString)
 				}
 			}
-			GlobalLogger.Infof("[Message Send](%s-%s): %s → %s \n", m.Author.ID, m.Author.Username, m.Content, answer)
-			s.ChannelMessageSend(m.ChannelID, answer)
+			logSendResult(s.ChannelMessageSend(m.ChannelID, answer))
 		}
 	case 2:
 		if !strings.Contains(pContent[0], "진원쿤") {
 			return
 		}
 		if strings.Contains(pContent[1], "정보") {
-			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+			logSendResult(s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 				Type:  discordgo.EmbedTypeRich,
 				Title: "진원쿤 정보",
 				Fields: []*discordgo.MessageEmbedField{
@@ -66,9 +72,9 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					{Name: "데이터 수집, 제공", Value: "[24기 주진원](https://github.com/MainEpicenter)", Inline: true},
 				},
 				Description: "바라미실에 설치된 [하드웨어](https://github.com/ibarami/IsBaramiOpen)를 통해 수집한 정보를 제공하는 [웹페이지](https://ibarami.github.io)를 크롤링하여 정보를 제공하고 있습니다.",
-			})
+			}))
 		} else if strings.Contains(pContent[1], "도움말") {
-			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+			logSendResult(s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 				Type:  discordgo.EmbedTypeRich,
 				Title: "진원쿤 명령어",
 				Fields: []*discordgo.MessageEmbedField{
@@ -78,7 +84,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					{Name: "개발자 정보 보기", Value: "`진원쿤 디버그`", Inline: true},
 				},
 				Description: "원하는 기능의 명령어를 채팅방에 입력하면 됩니다.",
-			})
+			}))
 		} else if strings.Contains(pContent[1], "디버그") {
 			commits := GetAllCommits()
 			var openRecord, closeRecord, recentCommits string
@@ -98,7 +104,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				recentCommits += fmt.Sprintf("- %s\n", c)
 			}
 
-			s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+			logSendResult(s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 				Type:  discordgo.EmbedTypeRich,
 				Title: "진원쿤 디버그 정보",
 				Fields: []*discordgo.MessageEmbedField{
@@ -107,15 +113,26 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					{Name: "마지막 폐문 기록", Value: closeRecord, Inline: false},
 					{Name: "최근 5개 기록", Value: recentCommits, Inline: false},
 				},
-			})
+			}))
 		} else if strings.Contains(pContent[1], "윤성") {
 			if len(ysArt) == 0 {
-				s.ChannelMessageSend(m.ChannelID, "엥? 뭔가 문제가 있는데요...")
+				logSendResult(s.ChannelMessageSend(m.ChannelID, "엥? 뭔가 문제가 있는데요..."))
 				return
 			}
-			s.ChannelMessageSend(m.ChannelID, ysArt)
+			logSendResult(s.ChannelMessageSend(m.ChannelID, ysArt))
 		}
 	}
+}
+
+func logSendResult(msg *discordgo.Message, err error) {
+	if err != nil {
+		GlobalLogger.WithError(err).Errorln("fail to send message")
+		return
+	}
+	GlobalLogger.WithFields(logrus.Fields{
+		"content": msg.Content,
+		"channel": msg.ChannelID,
+	}).Infoln("message is sent")
 }
 
 func formatSecond(sec int64) string {
