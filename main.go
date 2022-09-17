@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/namsral/flag"
 
 	elogrus "github.com/dictor/echologrus"
@@ -11,6 +12,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// CustomValidator is struct validator for request input
+type CustomValidator struct {
+	validator *validator.Validate
+}
+
 var (
 	gitTag, gitHash, buildDate string // build flags
 	currentDoorStatus          bool   // latest door status
@@ -18,6 +24,11 @@ var (
 	// GlobalLogger is global default logger in whole program
 	GlobalLogger elogrus.EchoLogger
 )
+
+// Validate is just renamed function of struct validate method
+func (cv *CustomValidator) Validate(i interface{}) error {
+	return cv.validator.Struct(i)
+}
 
 func mustAction(action string, err error) {
 	if err != nil {
@@ -33,6 +44,7 @@ func main() {
 	e := echo.New()
 	GlobalLogger = elogrus.Attach(e)
 	GlobalLogger.Infof("jinwonbot %s (%s) - %s", gitTag, gitHash, buildDate)
+	e.Validator = &CustomValidator{validator: validator.New()}
 
 	/* Get CLI flags */
 	var (
@@ -70,7 +82,7 @@ func main() {
 		commits, err := ListRepositoryCommits(repo, time.Time{})
 		mustAction("get commits", err)
 		GlobalLogger.Infof("%d commits retieved!", len(commits))
-		mustAction("append commits", AppendStore(commits...))
+		mustAction("append commits", AppendCommitToStore(commits...))
 		mustAction("save store", SaveStore())
 	}
 	GlobalLogger.Infof("github repo cloned successfully!")
@@ -81,6 +93,8 @@ func main() {
 	e.GET("/version", ReadVersion)
 	e.GET("/commit", ReadCommit)
 	e.GET("/latest", ReadLatestCommit)
+	e.PUT("/log", UpdateLog)
+	e.PUT("/heartbeat", UpdateHeartbeat)
 	e.Logger.Fatal(e.Start(listenPath))
 }
 
@@ -103,7 +117,7 @@ func UpdateStatusLoop(repo *git.Repository, delayPeriod int) {
 		if err != nil {
 			GlobalLogger.Errorf("ListRepositoryCommits: %s", err)
 		} else if len(commits) > 0 {
-			if err := AppendStore(commits...); err != nil {
+			if err := AppendCommitToStore(commits...); err != nil {
 				GlobalLogger.Errorf("AppendStore: %s", err)
 			}
 			if err := SaveStore(); err != nil {
