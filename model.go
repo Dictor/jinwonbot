@@ -104,7 +104,7 @@ func AppendLogToStore(ip string, level string, data string) error {
 	logs := (*currentStore.Logs)
 	log, exist := logs[ip]
 	if !exist {
-		log = data
+		log = fmt.Sprintf("[%s] %s", level, data)
 	} else {
 		log = strings.Join([]string{log, fmt.Sprintf("[%s] %s", level, data)}, "\n")
 	}
