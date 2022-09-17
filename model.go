@@ -149,6 +149,11 @@ func GetLogString() string {
 	for ip, v := range constraintLogs {
 		str += fmt.Sprintf("[%s 의 로그]\n%s\n", ip, v)
 	}
+
+	if str == "" {
+		str = "내용 없음"
+	}
+
 	return str
 }
 
@@ -159,6 +164,11 @@ func GetHeartbeatString() string {
 	for ip, t := range hbs {
 		str += fmt.Sprintf("[%s] : %s\n", ip, t)
 	}
+
+	if str == "" {
+		str = "내용 없음"
+	}
+
 	return str
 }
 
