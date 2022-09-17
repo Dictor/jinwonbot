@@ -106,7 +106,7 @@ func AppendLogToStore(ip string, level string, data string) error {
 	if !exist {
 		log = data
 	} else {
-		log = strings.Join([]string{log, fmt.Sprintf("<%s> %s", level, data)}, "\n")
+		log = strings.Join([]string{log, fmt.Sprintf("[%s] %s", level, data)}, "\n")
 	}
 	logs[ip] = log
 	currentStore.Logs = &logs
@@ -147,9 +147,9 @@ func GetLogString() string {
 		}
 	}
 	for ip, v := range constraintLogs {
-		str += fmt.Sprintf("* [%s 의 로그]\n%s\n", ip, v)
+		str += fmt.Sprintf("[%s 의 로그]\n%s\n", ip, v)
 	}
-	return fmt.Sprint(constraintLogs)
+	return str
 }
 
 func GetHeartbeatString() string {
@@ -157,7 +157,7 @@ func GetHeartbeatString() string {
 	str := ""
 
 	for ip, t := range hbs {
-		str += fmt.Sprintf("* [%s] : %s\n", ip, t)
+		str += fmt.Sprintf("[%s] : %s\n", ip, t)
 	}
 	return str
 }
