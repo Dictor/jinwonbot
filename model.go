@@ -106,7 +106,7 @@ func AppendLogToStore(ip string, level string, data string) error {
 	if !exist {
 		log = data
 	} else {
-		log = strings.Join([]string{log, data}, "\n")
+		log = strings.Join([]string{log, fmt.Sprintf("<%s> %s", level, data)}, "\n")
 	}
 	logs[ip] = log
 	currentStore.Logs = &logs
@@ -138,6 +138,7 @@ func GetStoreVersion() int64 {
 func GetLogString() string {
 	logs := *currentStore.Logs
 	constraintLogs := map[string]string{}
+	str := ""
 	for k, v := range logs {
 		if len(v) > 1000 {
 			constraintLogs[k] = v[:1000]
@@ -145,12 +146,20 @@ func GetLogString() string {
 			constraintLogs[k] = v
 		}
 	}
+	for ip, v := range constraintLogs {
+		str += fmt.Sprintf("* [%s 의 로그]\n%s\n", ip, v)
+	}
 	return fmt.Sprint(constraintLogs)
 }
 
 func GetHeartbeatString() string {
 	hbs := *currentStore.Hearbeats
-	return fmt.Sprint(hbs)
+	str := ""
+
+	for ip, t := range hbs {
+		str += fmt.Sprintf("* [%s] : %s\n", ip, t)
+	}
+	return str
 }
 
 // SaveStore save commit store to file system
