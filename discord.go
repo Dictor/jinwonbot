@@ -112,6 +112,9 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					{Name: "마지막 개문 기록", Value: openRecord, Inline: false},
 					{Name: "마지막 폐문 기록", Value: closeRecord, Inline: false},
 					{Name: "최근 5개 기록", Value: recentCommits, Inline: false},
+					{Name: "Store 버전", Value: fmt.Sprintf("%d", GetStoreVersion()), Inline: false},
+					{Name: "하트비트 리스트", Value: GetHeartbeatString(), Inline: false},
+					{Name: "로그 리스트", Value: GetLogString(), Inline: false},
 				},
 			}))
 		} else if strings.Contains(pContent[1], "윤성") {

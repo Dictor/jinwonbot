@@ -67,6 +67,35 @@ func ReadCommit(c echo.Context) error {
 	return c.JSON(http.StatusOK, (*commits)[commitslen-limit:commitslen])
 }
 
+func UpdateLog(c echo.Context) error {
+	ip := c.RealIP()
+
+	log := LogUpdateRequest{}
+	if err := c.Bind(&log); err != nil {
+		c.Logger().Info(err)
+		return c.NoContent(http.StatusBadRequest)
+	}
+	if err := c.Validate(&log); err != nil {
+		c.Logger().Info(err)
+		return c.NoContent(http.StatusBadRequest)
+	}
+
+	if err := AppendLogToStore(ip, log.Level, log.Data); err != nil {
+		c.Logger().Info(err)
+		return c.NoContent(http.StatusBadRequest)
+	}
+	return c.NoContent(http.StatusOK)
+}
+
+func UpdateHeartbeat(c echo.Context) error {
+	ip := c.RealIP()
+	if err := UpdateHeartbeatToStore(ip); err != nil {
+		c.Logger().Info(err)
+		return c.NoContent(http.StatusInternalServerError)
+	}
+	return c.NoContent(http.StatusOK)
+}
+
 func errorResponse(c echo.Context, reason errorReason) error {
 	return c.JSON(errorReasonToCode[reason], map[string]string{
 		"reason": string(reason),
