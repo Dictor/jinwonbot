@@ -69,6 +69,15 @@ func OpenStore(path string) (isNew bool, openError error) {
 		openError = err
 		return
 	}
+
+	if currentStore.Hearbeats == nil {
+		currentStore.Hearbeats = &map[string]string{}
+	}
+
+	if currentStore.Logs == nil {
+		currentStore.Logs = &map[string]string{}
+	}
+
 	currentStore.Lock = &sync.Mutex{}
 	return
 }
