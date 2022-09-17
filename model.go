@@ -3,17 +3,27 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"sync"
+	"time"
 )
 
 type (
 	// CommitStore is commits storing json store
 	CommitStore struct {
-		Version int64
-		Commits []*Commit
-		Lock    *sync.Mutex `json:"-"` //Write sync mutex
+		Version   int64
+		Commits   []*Commit
+		Hearbeats *map[string]string
+		Logs      *map[string]string
+		Lock      *sync.Mutex `json:"-"` //Write sync mutex
+	}
+
+	LogUpdateRequest struct {
+		Level string `json:"level" validate:"required"`
+		Data  string `json:"data" validate:"required"`
 	}
 )
 
@@ -63,8 +73,8 @@ func OpenStore(path string) (isNew bool, openError error) {
 	return
 }
 
-// AppendStore append given commits in commit store
-func AppendStore(commits ...*Commit) error {
+// AppendCommitToStore append given commits in commit store
+func AppendCommitToStore(commits ...*Commit) error {
 	if currentStore == nil {
 		return errors.New("there is no opened store")
 	}
@@ -74,6 +84,64 @@ func AppendStore(commits ...*Commit) error {
 	currentStore.Version++
 	currentStore.Lock.Unlock()
 	return nil
+}
+
+func AppendLogToStore(ip string, level string, data string) error {
+	if currentStore == nil {
+		return errors.New("there is no opened store")
+	}
+	currentStore.Lock.Lock()
+
+	logs := (*currentStore.Logs)
+	log, exist := logs[ip]
+	if !exist {
+		log = data
+	} else {
+		log = strings.Join([]string{log, data}, "\n")
+	}
+	logs[ip] = log
+	currentStore.Logs = &logs
+
+	currentStore.Version++
+	currentStore.Lock.Unlock()
+	return nil
+}
+
+func UpdateHeartbeatToStore(ip string) error {
+	if currentStore == nil {
+		return errors.New("there is no opened store")
+	}
+	currentStore.Lock.Lock()
+
+	beatTime := (*currentStore.Hearbeats)
+	beatTime[ip] = time.Now().String()
+	currentStore.Hearbeats = &beatTime
+	currentStore.Version++
+
+	currentStore.Lock.Unlock()
+	return nil
+}
+
+func GetStoreVersion() int64 {
+	return currentStore.Version
+}
+
+func GetLogString() string {
+	logs := *currentStore.Logs
+	constraintLogs := map[string]string{}
+	for k, v := range logs {
+		if len(v) > 1000 {
+			constraintLogs[k] = v[:1000]
+		} else {
+			constraintLogs[k] = v
+		}
+	}
+	return fmt.Sprint(constraintLogs)
+}
+
+func GetHeartbeatString() string {
+	hbs := *currentStore.Hearbeats
+	return fmt.Sprint(hbs)
 }
 
 // SaveStore save commit store to file system
