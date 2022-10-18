@@ -89,6 +89,10 @@ func main() {
 	go UpdateStatusLoop(repo, insertPeriod)
 	go FixUniquenessLoop(uniquePeriod)
 
+	/* write starting log */
+	AppendLogToStore("host", "info", "jinwonbot started")
+	SaveStore()
+
 	/* Start web server */
 	e.GET("/version", ReadVersion)
 	e.GET("/commit", ReadCommit)
@@ -96,6 +100,7 @@ func main() {
 	e.PUT("/log", UpdateLog)
 	e.PUT("/heartbeat", UpdateHeartbeat)
 	e.Logger.Fatal(e.Start(listenPath))
+	AppendLogToStore("host", "info", "jinwonbot unexpectedly halted")
 }
 
 // UpdateStatusLoop is update door status in infinity loop

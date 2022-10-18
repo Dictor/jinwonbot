@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -35,6 +36,24 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 			"author_name": m.Author.Username,
 			"content":     m.Content,
 		}).Infoln("bot is called")
+
+		callCount := GetInfo(CallCount)
+		if callCount == "" {
+			if err := SetInfoToStore(CallCount, "1"); err != nil {
+				GlobalLogger.WithError(err).Error("fail to set call count as 1")
+			} else {
+				n, err := strconv.ParseInt(callCount, 10, 64)
+				if err == nil {
+					n++
+					err = SetInfoToStore(CallCount, strconv.FormatInt(n, 10))
+					if err != nil {
+						GlobalLogger.WithError(err).Error("fail to increase call count")
+					}
+				} else {
+					GlobalLogger.WithError(err).Error("fail to parse call count")
+				}
+			}
+		}
 	}
 	pContent := strings.Split(m.Content, " ")
 	switch len(pContent) {
@@ -70,6 +89,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					{Name: "제작자", Value: "[25기 김정현](https://github.com/Dictor)", Inline: true},
 					{Name: "소스코드", Value: "[깃헙 저장소](https://github.com/Dictor/jinwonbot)", Inline: true},
 					{Name: "데이터 수집, 제공", Value: "[24기 주진원](https://github.com/MainEpicenter)", Inline: true},
+					{Name: "인기만점진원쿤", Value: fmt.Sprintf("지금까지 %s번 불렸어요!", GetInfo(CallCount)), Inline: true},
 				},
 				Description: "바라미실에 설치된 [하드웨어](https://github.com/ibarami/IsBaramiOpen)를 통해 수집한 정보를 제공하는 [웹페이지](https://ibarami.github.io)를 크롤링하여 정보를 제공하고 있습니다.",
 			}))

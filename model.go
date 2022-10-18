@@ -18,6 +18,7 @@ type (
 		Commits   []*Commit
 		Hearbeats *map[string]string
 		Logs      *map[string]string
+		Info      *map[string]string
 		Lock      *sync.Mutex `json:"-"` //Write sync mutex
 	}
 
@@ -25,12 +26,18 @@ type (
 		Level string `json:"level" validate:"required"`
 		Data  string `json:"data" validate:"required"`
 	}
+
+	InfoKey string
 )
 
 var (
 	currentStore      *CommitStore
 	currentStorePath  string
 	lastUpdateVersion int64
+)
+
+const (
+	CallCount InfoKey = InfoKey("call_count")
 )
 
 // OpenStore open commit store. When there is no file in path, create new store on the path.
@@ -78,6 +85,10 @@ func OpenStore(path string) (isNew bool, openError error) {
 		currentStore.Logs = &map[string]string{}
 	}
 
+	if currentStore.Info == nil {
+		currentStore.Info = &map[string]string{}
+	}
+
 	currentStore.Lock = &sync.Mutex{}
 	return
 }
@@ -116,6 +127,21 @@ func AppendLogToStore(ip string, level string, data string) error {
 	return nil
 }
 
+func SetInfoToStore(key InfoKey, data string) error {
+	if currentStore == nil {
+		return errors.New("there is no opened store")
+	}
+	currentStore.Lock.Lock()
+
+	info := (*currentStore.Info)
+	info[string(key)] = data
+	currentStore.Info = &info
+
+	currentStore.Version++
+	currentStore.Lock.Unlock()
+	return nil
+}
+
 func UpdateHeartbeatToStore(ip string) error {
 	if currentStore == nil {
 		return errors.New("there is no opened store")
@@ -133,6 +159,14 @@ func UpdateHeartbeatToStore(ip string) error {
 
 func GetStoreVersion() int64 {
 	return currentStore.Version
+}
+
+func GetInfo(key InfoKey) string {
+	if v, ok := (*currentStore.Info)[string(key)]; ok {
+		return v
+	} else {
+		return ""
+	}
 }
 
 func GetLogString() string {
