@@ -41,20 +41,20 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if callCount == "" {
 			if err := SetInfoToStore(CallCount, "1"); err != nil {
 				GlobalLogger.WithError(err).Error("fail to set call count as 1")
-			} else {
-				n, err := strconv.ParseInt(callCount, 10, 64)
-				if err == nil {
-					n++
-					err = SetInfoToStore(CallCount, strconv.FormatInt(n, 10))
-					if err != nil {
-						GlobalLogger.WithError(err).Error("fail to increase call count")
-					}
-				} else {
-					GlobalLogger.WithError(err).Error("fail to parse call count")
-				}
 			}
-			SaveStore()
+		} else {
+			n, err := strconv.ParseInt(callCount, 10, 64)
+			if err == nil {
+				n++
+				err = SetInfoToStore(CallCount, strconv.FormatInt(n, 10))
+				if err != nil {
+					GlobalLogger.WithError(err).Error("fail to increase call count")
+				}
+			} else {
+				GlobalLogger.WithError(err).Error("fail to parse call count")
+			}
 		}
+		SaveStore()
 	}
 	pContent := strings.Split(m.Content, " ")
 	switch len(pContent) {
