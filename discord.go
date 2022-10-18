@@ -49,6 +49,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					if err != nil {
 						GlobalLogger.WithError(err).Error("fail to increase call count")
 					}
+					SaveStore()
 				} else {
 					GlobalLogger.WithError(err).Error("fail to parse call count")
 				}
