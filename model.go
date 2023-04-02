@@ -114,10 +114,11 @@ func AppendLogToStore(ip string, level string, data string) error {
 
 	logs := (*currentStore.Logs)
 	log, exist := logs[ip]
+	line := fmt.Sprintf("[%s] %s %s", time.Now().Format("06/01/02 15:04:05"), level, data)
 	if !exist {
-		log = fmt.Sprintf("[%s] %s", level, data)
+		log = line
 	} else {
-		log = strings.Join([]string{log, fmt.Sprintf("[%s] %s", level, data)}, "\n")
+		log = strings.Join([]string{log, line}, "\n")
 	}
 	logs[ip] = log
 	currentStore.Logs = &logs

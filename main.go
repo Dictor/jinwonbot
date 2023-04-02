@@ -90,7 +90,7 @@ func main() {
 	go FixUniquenessLoop(uniquePeriod)
 
 	/* write starting log */
-	AppendLogToStore("host", "info", "jinwonbot started")
+	AppendLogToStore("host", "I", "jinwonbot started")
 	SaveStore()
 
 	/* Start web server */
@@ -99,8 +99,8 @@ func main() {
 	e.GET("/latest", ReadLatestCommit)
 	e.PUT("/log", UpdateLog)
 	e.PUT("/heartbeat", UpdateHeartbeat)
-	e.Logger.Fatal(e.Start(listenPath))
-	AppendLogToStore("host", "info", "jinwonbot unexpectedly halted")
+	e.Logger.Error(e.Start(listenPath))
+	AppendLogToStore("host", "E", "jinwonbot unexpectedly halted")
 }
 
 // UpdateStatusLoop is update door status in infinity loop
@@ -141,6 +141,7 @@ func FixUniquenessLoop(delayPeriod int) {
 		afterCnt := len(*GetAllCommits())
 		if err != nil {
 			GlobalLogger.Errorf("FixUniqueness: %s", err)
+			AppendLogToStore("host", "E", "FixUniqueness failed")
 		}
 		GlobalLogger.Infof("FixUniqueness %d duplicated commits are fixed", beforeCnt-afterCnt)
 

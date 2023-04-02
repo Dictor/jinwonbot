@@ -155,6 +155,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 func logSendResult(msg *discordgo.Message, err error) {
 	if err != nil {
 		GlobalLogger.WithError(err).Errorln("fail to send message")
+		AppendLogToStore("host", "E", "logSendResult negative")
 		return
 	}
 	GlobalLogger.WithFields(logrus.Fields{
