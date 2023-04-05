@@ -192,7 +192,7 @@ func GetLogString() string {
 		}
 	}
 	for ip, v := range constraintLogs {
-		str += fmt.Sprintf("[%s 의 로그]\n%s\n", ip, v)
+		str += fmt.Sprintf("<%s 의 로그>\n%s\n", ip, v)
 	}
 
 	if str == "" {
@@ -209,7 +209,7 @@ func GetHeartbeatString() string {
 	for ip, t := range hbs {
 		pt, err := time.Parse(time.RFC3339, t)
 		if err == nil {
-			t = formatSecond(int64(time.Since(pt)))
+			t = formatSecond(int64(time.Since(pt).Seconds()))
 		}
 		str += fmt.Sprintf("[%s] : %s\n", ip, t)
 	}
