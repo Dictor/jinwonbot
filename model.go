@@ -192,7 +192,7 @@ func GetLogString() string {
 		}
 	}
 	for ip, v := range constraintLogs {
-		str += fmt.Sprintf("<%s 의 로그>\n%s\n", ip, v)
+		str += fmt.Sprintf("(%s 의 로그)\n%s\n", ip, v)
 	}
 
 	if str == "" {
