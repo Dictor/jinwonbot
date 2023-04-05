@@ -135,9 +135,17 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					{Name: "최근 5개 기록", Value: recentCommits, Inline: false},
 					{Name: "Store 정보", Value: fmt.Sprintf("버전 %d, %s", GetStoreVersion(), GetStoreDebugString()), Inline: false},
 					{Name: "하트비트 리스트", Value: GetHeartbeatString(), Inline: false},
-					{Name: "로그 리스트", Value: GetLogString(), Inline: false},
 				},
 			}))
+			for ip, v := range GetLogString() {
+				logSendResult(s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+					Type:  discordgo.EmbedTypeRich,
+					Title: "진원쿤 디버그 정보 (로그)",
+					Fields: []*discordgo.MessageEmbedField{
+						{Name: fmt.Sprintf("%s의 로그", ip), Value: v, Inline: false},
+					},
+				}))
+			}
 		} else if strings.Contains(pContent[1], "윤성") {
 			if len(ysArt) == 0 {
 				logSendResult(s.ChannelMessageSend(m.ChannelID, "엥? 뭔가 문제가 있는데요..."))

@@ -180,26 +180,19 @@ func GetInfo(key InfoKey) string {
 	}
 }
 
-func GetLogString() string {
+func GetLogString() map[string]string {
 	logs := *currentStore.Logs
 	constraintLogs := map[string]string{}
-	str := ""
+	lengthLimit := 500
+
 	for k, v := range logs {
-		if len(v) > 1000 {
-			constraintLogs[k] = v[:1000]
+		if len(v) > lengthLimit {
+			constraintLogs[k] = v[len(v)-lengthLimit:]
 		} else {
 			constraintLogs[k] = v
 		}
 	}
-	for ip, v := range constraintLogs {
-		str += fmt.Sprintf("(%s 의 로그)\n%s\n", ip, v)
-	}
-
-	if str == "" {
-		str = "내용 없음"
-	}
-
-	return str
+	return constraintLogs
 }
 
 func GetHeartbeatString() string {
