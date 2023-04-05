@@ -156,7 +156,7 @@ func UpdateHeartbeatToStore(ip string) error {
 	currentStore.Lock.Lock()
 
 	beatTime := (*currentStore.Hearbeats)
-	beatTime[ip] = time.Now().String()
+	beatTime[ip] = time.Now().Format(time.RFC3339)
 	currentStore.Hearbeats = &beatTime
 	currentStore.Version++
 
@@ -207,6 +207,10 @@ func GetHeartbeatString() string {
 	str := ""
 
 	for ip, t := range hbs {
+		pt, err := time.Parse(time.RFC3339, t)
+		if err == nil {
+			t = formatSecond(int64(time.Since(pt)))
+		}
 		str += fmt.Sprintf("[%s] : %s\n", ip, t)
 	}
 
