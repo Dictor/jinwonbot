@@ -31,9 +31,10 @@ type (
 )
 
 var (
-	currentStore      *CommitStore
-	currentStorePath  string
-	lastUpdateVersion int64
+	currentStore            *CommitStore
+	currentStorePath        string
+	lastUpdateVersion       int64
+	currentStoreDebugString string
 )
 
 const (
@@ -47,12 +48,15 @@ func OpenStore(path string) (isNew bool, openError error) {
 		return
 	}
 
+	before := time.Now()
+	storeSize := 0
 	if _, err := os.Stat(path); err == nil {
 		data, err := ioutil.ReadFile(path)
 		if err != nil {
 			openError = err
 			return
 		}
+		storeSize = len(data)
 		if err := json.Unmarshal(data, &currentStore); err != nil {
 			openError = err
 			return
@@ -90,6 +94,8 @@ func OpenStore(path string) (isNew bool, openError error) {
 	}
 
 	currentStore.Lock = &sync.Mutex{}
+	after := time.Since(before)
+	currentStoreDebugString = fmt.Sprintf("크기는 %d 바이트, 여는데 %d ms 걸렸습니다.", storeSize, after.Milliseconds())
 	return
 }
 
@@ -160,6 +166,10 @@ func UpdateHeartbeatToStore(ip string) error {
 
 func GetStoreVersion() int64 {
 	return currentStore.Version
+}
+
+func GetStoreDebugString() string {
+	return currentStoreDebugString
 }
 
 func GetInfo(key InfoKey) string {
