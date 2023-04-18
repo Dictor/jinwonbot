@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math"
 	"os"
 	"strings"
 	"sync"
@@ -193,6 +194,37 @@ func GetLogString() map[string]string {
 		}
 	}
 	return constraintLogs
+}
+
+func GetLatestHeartbeat() *struct {
+	string
+	int64
+} {
+	list := make(map[string]int64, 8)
+	hbs := *currentStore.Hearbeats
+	for ip, t := range hbs {
+		pt, err := time.Parse(time.RFC3339, t)
+		if err == nil {
+			list[ip] = int64(time.Since(pt).Seconds())
+		}
+	}
+
+	if len(list) == 0 {
+		return nil
+	}
+
+	mink := ""
+	minv := int64(math.MaxInt64)
+	for ip, t := range list {
+		if t <= minv {
+			mink = ip
+			minv = t
+		}
+	}
+	return &struct {
+		string
+		int64
+	}{mink, minv}
 }
 
 func GetHeartbeatString() string {

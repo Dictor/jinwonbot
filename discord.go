@@ -75,6 +75,12 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					answer += fmt.Sprintf("닫혀있습니다! %s전에 닫혔어요!", timeString)
 				}
 			}
+			latestHeartbeat := GetLatestHeartbeat()
+			if latestHeartbeat == nil {
+				answer += "\n[경고] 수신된 하트비트가 없습니다. 유효하지 않은 과거 데이터가 표시될 수 있습니다."
+			} else if latestHeartbeat.int64 > 3600 {
+				answer += "\n[경고] 주 단말기의 마지막 하트비트가 수신된지 1시간이 지났습니다. 주 단말기가 고장나 올바른 정보를 표시하지 않을 수도 있습니다."
+			}
 			logSendResult(s.ChannelMessageSend(m.ChannelID, answer))
 		}
 	case 2:
@@ -125,6 +131,14 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				recentCommits += fmt.Sprintf("- %s\n", c)
 			}
 
+			latestHeartbeat := GetLatestHeartbeat()
+			latestHeartbeatString := ""
+			if latestHeartbeat == nil {
+				latestHeartbeatString = "수신된 하트비트가 없습니다."
+			} else {
+				latestHeartbeatString = fmt.Sprintf("%s 전에 하트비트를 발신한 %s가 주 단말기입니다.", formatSecond(latestHeartbeat.int64), latestHeartbeat.string)
+			}
+
 			logSendResult(s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
 				Type:  discordgo.EmbedTypeRich,
 				Title: "진원쿤 디버그 정보",
@@ -134,7 +148,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					{Name: "마지막 폐문 기록", Value: closeRecord, Inline: false},
 					{Name: "최근 5개 기록", Value: recentCommits, Inline: false},
 					{Name: "Store 정보", Value: fmt.Sprintf("버전 %d, %s", GetStoreVersion(), GetStoreDebugString()), Inline: false},
-					{Name: "하트비트 리스트", Value: GetHeartbeatString(), Inline: false},
+					{Name: "하트비트 리스트", Value: fmt.Sprintf("%s\n%s", GetHeartbeatString(), latestHeartbeatString), Inline: false},
 				},
 			}))
 			for ip, v := range GetLogString() {
