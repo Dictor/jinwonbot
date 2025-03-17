@@ -1,4 +1,4 @@
-FROM golang:1.18-alpine
+FROM golang:1.24-alpine
 
 ADD . /jinwonbot
 WORKDIR "/jinwonbot"
