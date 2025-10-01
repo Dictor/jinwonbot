@@ -181,17 +181,13 @@ func GetInfo(key InfoKey) string {
 	}
 }
 
+// return key = ip address, value = log string
 func GetLogString() map[string]string {
 	logs := *currentStore.Logs
 	constraintLogs := map[string]string{}
-	lengthLimit := 500
 
 	for k, v := range logs {
-		if len(v) > lengthLimit {
-			constraintLogs[k] = v[len(v)-lengthLimit:]
-		} else {
-			constraintLogs[k] = v
-		}
+		constraintLogs[k] = v
 	}
 	return constraintLogs
 }

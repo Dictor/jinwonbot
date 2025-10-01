@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 	"time"
@@ -151,15 +152,18 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 					{Name: "하트비트 리스트", Value: fmt.Sprintf("%s\n%s", GetHeartbeatString(), latestHeartbeatString), Inline: false},
 				},
 			}))
-			for ip, v := range GetLogString() {
-				logSendResult(s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
-					Type:  discordgo.EmbedTypeRich,
-					Title: "진원쿤 디버그 정보 (로그)",
-					Fields: []*discordgo.MessageEmbedField{
-						{Name: fmt.Sprintf("%s의 로그", ip), Value: v, Inline: false},
-					},
-				}))
+
+			logSizeInfo := []*discordgo.MessageEmbedField{
+				{Name: "로그를 확인하기 위해 '진원쿤 디버그로그 <단말기 주소> <페이지 번호> 명령어를 사용하세요.'", Value: "", Inline: false},
 			}
+			for ip, v := range GetLogString() {
+				logSizeInfo = append(logSizeInfo, &discordgo.MessageEmbedField{Name: fmt.Sprintf("단말기 '%s'", ip), Value: fmt.Sprintf("%d bytes", len(v)), Inline: false})
+			}
+			logSendResult(s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+				Type:   discordgo.EmbedTypeRich,
+				Title:  "로그를 기록한 단말기 목록",
+				Fields: logSizeInfo,
+			}))
 		} else if strings.Contains(pContent[1], "윤성") {
 			if len(ysArt) == 0 {
 				logSendResult(s.ChannelMessageSend(m.ChannelID, "엥? 뭔가 문제가 있는데요..."))
@@ -170,6 +174,48 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 				Description: ysArt,
 			},
 			))
+		}
+	case 4:
+		if pContent[1] == "디버그로그" {
+			logs := GetLogString()
+			targetLog, exist := logs[pContent[2]]
+			const bytesPerPage int = 2000
+
+			if !exist {
+				logSendResult(s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("'%s' 단말기가 존재하지 않습니다.", pContent[2])))
+				return
+			}
+
+			targetLogPageCount := int(math.Ceil(float64(len(targetLog)) / float64(bytesPerPage)))
+			if targetLogPageCount <= 0 {
+				logSendResult(s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("'%s' 단말기가 존재하지만, 기록된 로그가 없습니다.", pContent[2])))
+				return
+			}
+
+			targetPage, err := strconv.Atoi(pContent[3])
+			if err != nil {
+				logSendResult(s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("'%s'는 올바른 페이지 번호가 아닙니다. (%s)", pContent[3], err)))
+				return
+			}
+			if targetPage <= 0 {
+				logSendResult(s.ChannelMessageSend(m.ChannelID, "페이지 번호는 음수일 수 없습니다."))
+				return
+			}
+			if targetPage > targetLogPageCount {
+				logSendResult(s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("'%s' 단말기의 로그는 %d 페이지까지만 존재합니다.", pContent[2], targetLogPageCount)))
+				return
+			}
+
+			startIndex := bytesPerPage * (targetPage - 1)
+			endIndex := min(len(targetLog), bytesPerPage*targetPage)
+			targetLogPage := targetLog[startIndex:endIndex]
+			logSendResult(s.ChannelMessageSendEmbed(m.ChannelID, &discordgo.MessageEmbed{
+				Type:  discordgo.EmbedTypeRich,
+				Title: fmt.Sprintf("진원쿤 단말기 '%s'의 로그 (%d 페이지)", pContent[2], targetPage),
+				Fields: []*discordgo.MessageEmbedField{
+					{Name: "로그", Value: targetLogPage, Inline: false},
+				},
+			}))
 		}
 	}
 }
