@@ -179,7 +179,7 @@ func messageHandler(s *discordgo.Session, m *discordgo.MessageCreate) {
 		if pContent[1] == "디버그로그" {
 			logs := GetLogString()
 			targetLog, exist := logs[pContent[2]]
-			const bytesPerPage int = 2000
+			const bytesPerPage int = 1000
 
 			if !exist {
 				logSendResult(s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("'%s' 단말기가 존재하지 않습니다.", pContent[2])))
